@@ -131,6 +131,8 @@ namespace zed_wrapper {
         mNhNs.getParam("gpu_id", mGpuId);
         mNhNs.getParam("zed_id", mZedId);
         mNhNs.getParam("depth_stabilization", mDepthStabilization);
+        mNhNs.getParam("time_mode", mTimeMode);
+        NODELET_INFO_STREAM("Time Mode : " << mTimeMode);
 
         int tmp_sn = 0;
         mNhNs.getParam("serial_number", tmp_sn);
@@ -1388,16 +1390,27 @@ namespace zed_wrapper {
         }
 
         ros::Time t;
+        // if (mSvoMode) {
+        //     t = ros::Time::now();
+        // } else {
+        //     if (mImuTimestampSync && mGrabActive) {
+        //         t = mFrameTimestamp;
+        //     } else {
+        //         t = sl_tools::slTime2Ros(mZed.getTimestamp(sl::TIME_REFERENCE_CURRENT));
+        //     }
+        // }
 
-        if (mSvoMode) {
+        if (mTimeMode == "default") {
+            t = mFrameTimestamp;  
+        } 
+        else if (mTimeMode == "ros_time") {
             t = ros::Time::now();
-        } else {
-            if (mImuTimestampSync && mGrabActive) {
-                t = mFrameTimestamp;
-            } else {
-                t = sl_tools::slTime2Ros(mZed.getTimestamp(sl::TIME_REFERENCE_CURRENT));
-            }
         }
+        else if (mTimeMode == "sl_time_ref_current") {
+            t = sl_tools::slTime2Ros(mZed.getTimestamp(sl::TIME_REFERENCE_CURRENT));
+        }
+
+        
 
         sl::IMUData imu_data;
 
@@ -1479,7 +1492,8 @@ namespace zed_wrapper {
 
         if (imu_RawSubNumber > 0) {
             sensor_msgs::Imu imu_raw_msg;
-            imu_raw_msg.header.stamp = mFrameTimestamp; // t;
+            imu_raw_msg.header.stamp = t; // t;
+            // imu_raw_msg.header.stamp = mFrameTimestamp;
             imu_raw_msg.header.frame_id = mImuFrameId;
             imu_raw_msg.angular_velocity.x = mSignX * imu_data.angular_velocity[mIdxX] * DEG2RAD;
             imu_raw_msg.angular_velocity.y = mSignY * imu_data.angular_velocity[mIdxY] * DEG2RAD;
@@ -1563,7 +1577,8 @@ namespace zed_wrapper {
             imu_pose.setRotation(delta_q);
             // Note, the frame is published, but its values will only change if someone
             // has subscribed to IMU
-            publishImuFrame(imu_pose, mFrameTimestamp); // publish the imu Frame
+            // publishImuFrame(imu_pose, mFrameTimestamp); // publish the imu Frame
+            publishImuFrame(imu_pose, t);
         }
     }
 
@@ -1741,7 +1756,7 @@ namespace zed_wrapper {
 
                     continue;
                 }
-
+                mTrackingActivated = true;
                 mPrevFrameTimestamp = mFrameTimestamp;
 
                 // Publish freq calculation
@@ -1754,10 +1769,19 @@ namespace zed_wrapper {
                 mGrabPeriodMean_usec->addValue(elapsed_usec);
 
                 // Timestamp
-                if (mSvoMode) {
+                // if (mSvoMode) {
+                //     mFrameTimestamp = ros::Time::now();
+                // } else {
+                //     mFrameTimestamp = sl_tools::slTime2Ros(mZed.getTimestamp(sl::TIME_REFERENCE_IMAGE));
+                // }
+                if (mTimeMode == "default") {
+                    mFrameTimestamp = mFrameTimestamp;  
+                } 
+                else if (mTimeMode == "ros_time") {
                     mFrameTimestamp = ros::Time::now();
-                } else {
-                    mFrameTimestamp = sl_tools::slTime2Ros(mZed.getTimestamp(sl::TIME_REFERENCE_IMAGE));
+                }
+                else if (mTimeMode == "sl_time_ref_current") {
+                    mFrameTimestamp = sl_tools::slTime2Ros(mZed.getTimestamp(sl::TIME_REFERENCE_CURRENT));
                 }
 
                 if (mCamAutoExposure) {

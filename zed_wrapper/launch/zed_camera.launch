@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          RESOLUTION_HD1080 -> 1920*1080, available framerates: 15, 30 fps.
          RESOLUTION_HD720  -> 1280*720,  available framerates: 15, 30, 60 fps.
          RESOLUTION_VGA    -> 672*376,   available framerates: 15, 30, 60, 100 fps. -->
+    <arg name="time_mode"            default="ros_time" /> <!-- use to set message time: default, ros_time, sl_time_ref_current -->
 
     <!-- GPU ID-->
     <arg name="gpu_id"                default="-1" />
@@ -88,7 +89,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <param name="resolution"            value="$(arg resolution)" />
         <param name="verbose"               value="$(arg verbose)" />
         <param name="mat_resize_factor"     value="1.0" />
-        <param name="quality"               value="1" />
+        <param name="quality"               value="0" />
         <param name="sensing_mode"          value="0" />
         <param name="frame_rate"            value="$(arg frame_rate)" />
         <param name="odometry_db"           value="" />
@@ -96,9 +97,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <param name="gpu_id"                value="$(arg gpu_id)" />
         <param name="confidence"            value="100" />
         <param name="max_depth"             value="10.0" />
-        <param name="gain"                  value="100" />
-        <param name="exposure"              value="100" />
-        <param name="auto_exposure"         value="true" />
+        <param name="gain"                  value="50" />
+        <param name="exposure"              value="8" />
+        <param name="auto_exposure"         value="false" />
         <param name="depth_stabilization"   value="1" />
         <param name="pose_smoothing"        value="false" />
         <param name="spatial_memory"        value="false" />
@@ -146,6 +147,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <param name="path_max_count"            value="-1" /> <!-- use "-1" for no limits -->
 
         <param name="publish_pose_covariance"   value="false" />
+
+        <param name="time_mode"                 value="$(arg time_mode)" /> <!-- use to set message time: default, ros_time, sl_time_ref_current -->
 
     </node>
 

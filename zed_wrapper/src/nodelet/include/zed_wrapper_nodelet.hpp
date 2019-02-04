@@ -346,6 +346,7 @@ namespace zed_wrapper {
         int mPathMaxCount;
         bool mVerbose;
         bool mSvoMode = false;
+        std::string mTimeMode="default";
 
         bool mTrackingActivated;
         bool mTrackingReady;
